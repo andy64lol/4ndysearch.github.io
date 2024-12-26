@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andysearch</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            transition: background-color 0.5s, color 0.5s, font-size 0.5s;
+            transition: all 0.5s ease;
+        }
+        h1 {
+            font-family: 'Roboto Slab', serif;
+            font-size: 3em;
+            margin-bottom: 10px;
+            transition: font-size 0.3s ease;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s ease;
+        }
+        button:hover {
+            transform: scale(1.1);
+            opacity: 0.9;
+        }
+        .top-buttons, .history-buttons {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            transition: transform 0.3s ease;
+        }
+        .top-buttons button, .history-buttons button {
+            margin: 0 5px;
+        }
+        .useless-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            color: black;
+            font-size: 50px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        .history {
+            margin-top: 20px;
+            text-align: left;
+            max-width: 600px;
+            margin: 20px auto;
+            transition: transform 0.5s ease;
+        }
+        .history ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .history ul li {
+            margin: 5px 0;
+            transition: transform 0.3s ease;
+        }
+        .feedback {
+            margin-top: 30px;
+            transition: transform 0.3s ease;
+        }
+        .light {
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .dark {
+            background-color: #1e1e1e;
+            color: #f4f4f9;
+        }
+        .high-contrast {
+            background-color: black;
+            color: yellow;
+        }
+    </style>
+    <script>
+        let total = 1;
+        let searchHistory = [];
+        let searchEngine = "https://duckduckgo.com/?q=";
+
+        function redirectToURL() {
+            const urlInput = document.getElementById("urlInput").value.trim();
+            if (urlInput === "") {
+                triggerUselessMode();
+            } else {
+                const validPattern = /(www\.|https?:\/\/).*?(\.com|\.org|\.net|\.edu|\.gov|\.io|\.co|\.us|\.uk|\.au)/i;
+                if (validPattern.test(urlInput)) {
+                    saveToHistory(urlInput);
+                    window.location.href = urlInput.startsWith("http") ? urlInput : "http://" + urlInput;
+                } else {
+                    saveToHistory(urlInput);
+                    window.location.href = searchEngine + encodeURIComponent(urlInput);
+                }
+            }
+        }
+
+        function triggerUselessMode() {
+            const overlay = document.createElement("div");
+            overlay.className = "useless-overlay";
+            overlay.innerText = total;
+            document.body.appendChild(overlay);
+
+            if (total === 2048) {
+                window.location.href = "https://ovolve.github.io/2048-AI/";
+                return;
+            }
+            total += total;
+
+            setTimeout(() => {
+                overlay.style.opacity = "0";
+                setTimeout(() => overlay.remove(), 500);
+            }, 1000);
+        }
+
+        function changeTheme(theme) {
+            document.body.className = theme;
+        }
+
+        function showCredits() {
+            alert("Andysearch\nCreated by a student who never sleeps...zzz\n© 2024 Andysearch.");
+        }
+
+        function saveToHistory(entry) {
+            searchHistory.push(entry);
+            updateHistory();
+        }
+
+        function updateHistory() {
+            const historyList = document.getElementById("historyList");
+            historyList.innerHTML = "";
+            searchHistory.forEach(item => {
+                const listItem = document.createElement("li");
+                listItem.textContent = item;
+                historyList.appendChild(listItem);
+            });
+        }
+
+        function clearInput() {
+            document.getElementById("urlInput").value = "";
+        }
+
+        function setSearchEngine(engine) {
+            searchEngine = engine;
+        }
+
+        function openFeedbackForm() {
+            window.open("https://forms.gle/HtpgniuoDpUgPfxK7", "_blank");
+        }
+    </script>
+</head>
+<body class="light">
+    <h1>Andysearch</h1>
+    <p>"Made by a student who never sleeps...zzz"</p>
+    <input type="text" id="urlInput" placeholder="Enter URL or search query">
+    <button onclick="redirectToURL()">Go</button>
+    <button onclick="clearInput()">Clear</button>
+    <div class="top-buttons">
+        <button onclick="document.getElementById('settings').style.display='block'">Settings</button>
+        <button onclick="showCredits()">Credits</button>
+    </div>
+    <div class="history-buttons">
+        <button onclick="document.getElementById('history').style.display='block'">History</button>
+    </div>
+    <div id="settings" style="display:none; margin-top: 20px;">
+        <p>Select Theme:</p>
+        <button onclick="changeTheme('light')">Light</button>
+        <button onclick="changeTheme('dark')">Dark</button>
+        <button onclick="changeTheme('high-contrast')">High Contrast</button>
+        <p>Select Search Engine:</p>
+        <button onclick="setSearchEngine('https://duckduckgo.com/?q=')">DuckDuckGo</button>
+        <button onclick="setSearchEngine('https://www.google.com/search?q=')">Google</button>
+        <button onclick="setSearchEngine('https://www.bing.com/search?q=')">Bing</button>
+        <p>Adjust Font Size:</p>
+        <button onclick="document.body.style.fontSize = '18px'">Increase</button>
+        <button onclick="document.body.style.fontSize = '14px'">Decrease</button>
+        <button onclick="document.getElementById('settings').style.display='none'">Close</button>
+    </div>
+    <div id="history" style="display:none; margin-top: 20px;">
+        <h3>Search History</h3>
+        <ul id="historyList"></ul>
+        <button onclick="document.getElementById('history').style.display='none'">Close</button>
+    </div>
+    <div class="feedback">
+        <button onclick="openFeedbackForm()">Give Feedback</button>
+    </div>
+</body>
+</html>
