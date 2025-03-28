@@ -13,8 +13,12 @@
         <button onclick="refreshPage()">↻</button>
         <input type="text" id="url-bar" placeholder="Enter URL or search">
         <button onclick="navigate()">Go</button>
-        <button onclick="switchCorsBypasser()">C</button>
+        <select id="cors-bypasser" onchange="updateCorsBypasser()">
+            <option value="https://cors-anywhere.herokuapp.com/">CORS Anywhere</option>
+            <option value="https://another-cors-proxy.com/">Another CORS Proxy</option>
+        </select>
     </div>
+
     <iframe id="browser-frame"></iframe>
     <script src="./script.js"></script>
 </body>
