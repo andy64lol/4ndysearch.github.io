@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4ndySearch! Browser</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="header">
+        <button onclick="goBack()">←</button>
+        <button onclick="goForward()">→</button>
+        <button onclick="refreshPage()">↻</button>
+        <input type="text" id="url-bar" placeholder="Enter URL or search">
+        <button onclick="navigate()">Go</button>
+    </div>
+    <iframe id="browser-frame"></iframe>
+    <script src="app.js"></script>
+</body>
+</html>
