@@ -13,12 +13,12 @@ function navigate() {
     }
     
     const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
-    const headers = new Headers({
+    const headers = {
         'Origin': window.location.origin,
         'X-Requested-With': 'XMLHttpRequest'
-    });
+    };
     
-    fetch(proxyUrl, { method: 'GET', headers })
+    fetch(proxyUrl, { method: 'GET', headers: headers })
         .then(response => response.text())
         .then(data => {
             iframe.srcdoc = data;
@@ -44,5 +44,5 @@ urlBar.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') navigate();
 });
 
-urlBar.value = 'https://example.com';
+urlBar.value = 'https://andy64lol.github.io/4ndysearch.github.io/start_page.html';
 navigate();
