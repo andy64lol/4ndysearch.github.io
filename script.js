@@ -137,5 +137,5 @@ function refreshPage() {
 
 urlBar.addEventListener('keypress', e => e.key === 'Enter' && navigate());
 
-urlBar.value = 'start_page.html';
+urlBar.value = 'www.example.com';
 navigate();
