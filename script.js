@@ -9,8 +9,7 @@ const bypassers = [
     'https://corsproxy.io/',
     'https://thingproxy.freeboard.io/fetch/',
     'https://yacdn.org/proxy/',
-    'https://www.cors-everywhere.herokuapp.com/',
-    'https://cors.bridged.cc/'
+    'https://www.cors-everywhere.herokuapp.com/'
 ];
 
 function isURL(str) {
