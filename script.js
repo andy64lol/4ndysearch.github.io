@@ -12,10 +12,6 @@ const bypassers = [
     'https://www.cors-everywhere.herokuapp.com/'
 ];
 
-function hasExistingBypasser(url) {
-    return bypassers.some(bypasser => url.startsWith(bypasser));
-}
-
 function isURL(str) {
     try {
         new URL(str);
@@ -23,6 +19,37 @@ function isURL(str) {
     } catch (_) {
         return false;
     }
+}
+
+function getCurrentProxy() {
+    return bypassers[currentBypasserIndex];
+}
+
+function isAbsoluteUrl(url) {
+    return /^https?:\/\//i.test(url);
+}
+
+function processUrl(url) {
+    if (!isURL(url)) {
+        return `${getCurrentProxy()}https://www.bing.com/search?q=${encodeURIComponent(url)}`;
+    }
+    
+    if (!url.startsWith('http')) {
+        url = `https://${url}`;
+    }
+    
+    if (url.includes(location.hostname)) {
+        const actualUrl = new URL(url).searchParams.get('url') || url.split('?url=')[1] || url;
+        if (actualUrl) {
+            url = actualUrl;
+        }
+    }
+    
+    if (!url.startsWith(getCurrentProxy()) && !bypassers.some(b => url.startsWith(b))) {
+        url = `${getCurrentProxy()}${encodeURI(url)}`;
+    }
+    
+    return url;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -34,6 +61,35 @@ document.addEventListener('DOMContentLoaded', () => {
         select.appendChild(option);
     });
     select.value = bypassers[0];
+    
+    iframe.addEventListener('load', function() {
+        try {
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            const links = iframeDoc.querySelectorAll('a[href]');
+            
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let href = this.getAttribute('href');
+                    
+                    if (!isAbsoluteUrl(href)) {
+                        const iframeLocation = iframe.contentWindow.location;
+                        const baseUrl = `${iframeLocation.protocol}//${iframeLocation.host}`;
+                        href = new URL(href, baseUrl).href;
+                    }
+                    
+                    if (!href.startsWith(getCurrentProxy())) {
+                        href = `${getCurrentProxy()}${encodeURI(href)}`;
+                    }
+                    
+                    urlBar.value = href;
+                    navigate();
+                });
+            });
+        } catch (error) {
+            console.log('Error processing iframe links:', error);
+        }
+    });
 });
 
 function updateCorsBypasser() {
@@ -49,15 +105,9 @@ function navigate(retryCount = 0) {
         return;
     }
 
-    if (!isURL(targetUrl)) {
-        targetUrl = `https://www.bing.com/search?q=${encodeURIComponent(targetUrl)}`;
-    } else if (!targetUrl.startsWith('http')) {
-        targetUrl = `https://${targetUrl}`;
-    }
+    targetUrl = processUrl(targetUrl);
 
-    let finalUrl = hasExistingBypasser(targetUrl) ? targetUrl : `${bypassers[currentBypasserIndex]}${encodeURI(targetUrl)}`;
-
-    fetch(finalUrl, { 
+    fetch(targetUrl, {
         method: 'GET',
         headers: {
             'Origin': window.location.origin,
@@ -70,6 +120,7 @@ function navigate(retryCount = 0) {
     })
     .then(data => {
         iframe.srcdoc = data;
+        urlBar.value = targetUrl;
     })
     .catch(error => {
         console.error('Error:', error);
