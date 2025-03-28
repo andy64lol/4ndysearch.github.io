@@ -12,6 +12,10 @@ const bypassers = [
     'https://www.cors-everywhere.herokuapp.com/'
 ];
 
+function hasExistingBypasser(url) {
+    return bypassers.some(bypasser => url.startsWith(bypasser));
+}
+
 function isURL(str) {
     try {
         new URL(str);
@@ -26,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bypassers.forEach((bypasser, index) => {
         const option = document.createElement('option');
         option.value = bypasser;
-        option.textContent = `Bypasser ${index + 1}`;
+        option.textContent = `Proxy ${index + 1}`;
         select.appendChild(option);
     });
     select.value = bypassers[0];
@@ -46,18 +50,14 @@ function navigate(retryCount = 0) {
     }
 
     if (!isURL(targetUrl)) {
-        const encodedQuery = encodeURIComponent(targetUrl);
-        targetUrl = `https://www.bing.com/search?q=${encodedQuery}`;
-    } else {
-
-        if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-            targetUrl = `https://${targetUrl}`;
-        }
+        targetUrl = `https://www.bing.com/search?q=${encodeURIComponent(targetUrl)}`;
+    } else if (!targetUrl.startsWith('http')) {
+        targetUrl = `https://${targetUrl}`;
     }
 
-    const proxyUrl = `${bypassers[currentBypasserIndex]}${encodeURI(targetUrl)}`;
+    let finalUrl = hasExistingBypasser(targetUrl) ? targetUrl : `${bypassers[currentBypasserIndex]}${encodeURI(targetUrl)}`;
 
-    fetch(proxyUrl, { 
+    fetch(finalUrl, { 
         method: 'GET',
         headers: {
             'Origin': window.location.origin,
@@ -72,30 +72,30 @@ function navigate(retryCount = 0) {
         iframe.srcdoc = data;
     })
     .catch(error => {
-        console.error('Error fetching the URL:', error);
+        console.error('Error:', error);
         
         if (retryCount < bypassers.length - 1) {
             currentBypasserIndex = (currentBypasserIndex + 1) % bypassers.length;
             document.getElementById('cors-bypasser').selectedIndex = currentBypasserIndex;
-            alert(`CORS error detected. Switching to bypasser ${currentBypasserIndex + 1}`);
+            alert(`Switching to Proxy ${currentBypasserIndex + 1}`);
             navigate(retryCount + 1);
         } else {
-            alert('All CORS bypassers failed. Please try again later or use a different query.');
+            alert('All proxies failed. Try again later.');
             iframe.srcdoc = `<h1>Error loading page</h1><p>${error.message}</p>`;
         }
     });
 }
 
 function goBack() {
-    iframe.contentWindow.history.back();
+    iframe.contentWindow?.history?.back();
 }
 
 function goForward() {
-    iframe.contentWindow.history.forward();
+    iframe.contentWindow?.history?.forward();
 }
 
 function refreshPage() {
-    iframe.contentWindow.location.reload();
+    iframe.contentWindow?.location?.reload();
 }
 
 urlBar.addEventListener('keypress', (e) => {
