@@ -25,31 +25,48 @@ function getCurrentProxy() {
     return bypassers[currentBypasserIndex];
 }
 
-function isAbsoluteUrl(url) {
-    return /^https?:\/\//i.test(url);
-}
-
-function processUrl(url) {
+function processUrl(inputUrl) {
+    let url = inputUrl.trim();
+    
+    for (const proxy of bypassers) {
+        if (url.startsWith(proxy)) {
+            url = url.replace(proxy, '');
+            break;
+        }
+    }
+    
     if (!isURL(url)) {
-        return `${getCurrentProxy()}https://www.bing.com/search?q=${encodeURIComponent(url)}`;
+        url = `https://www.bing.com/search?q=${encodeURIComponent(url)}`;
     }
     
     if (!url.startsWith('http')) {
         url = `https://${url}`;
     }
     
-    if (url.includes(location.hostname)) {
-        const actualUrl = new URL(url).searchParams.get('url') || url.split('?url=')[1] || url;
-        if (actualUrl) {
-            url = actualUrl;
-        }
+    return `${getCurrentProxy()}${encodeURI(url)}`;
+}
+
+function handleIframeLinks() {
+    try {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        const links = iframeDoc.querySelectorAll('a[href]');
+        
+        links.forEach(link => {
+            const originalHref = link.href;
+            const processedHref = processUrl(originalHref);
+            
+            link.href = processedHref;
+            link.target = '_top';
+            
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                urlBar.value = processedHref;
+                navigate();
+            });
+        });
+    } catch (error) {
+        console.log('Error processing links:', error);
     }
-    
-    if (!url.startsWith(getCurrentProxy()) && !bypassers.some(b => url.startsWith(b))) {
-        url = `${getCurrentProxy()}${encodeURI(url)}`;
-    }
-    
-    return url;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -62,34 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     select.value = bypassers[0];
     
-    iframe.addEventListener('load', function() {
-        try {
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            const links = iframeDoc.querySelectorAll('a[href]');
-            
-            links.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    let href = this.getAttribute('href');
-                    
-                    if (!isAbsoluteUrl(href)) {
-                        const iframeLocation = iframe.contentWindow.location;
-                        const baseUrl = `${iframeLocation.protocol}//${iframeLocation.host}`;
-                        href = new URL(href, baseUrl).href;
-                    }
-                    
-                    if (!href.startsWith(getCurrentProxy())) {
-                        href = `${getCurrentProxy()}${encodeURI(href)}`;
-                    }
-                    
-                    urlBar.value = href;
-                    navigate();
-                });
-            });
-        } catch (error) {
-            console.log('Error processing iframe links:', error);
-        }
-    });
+    iframe.addEventListener('load', handleIframeLinks);
 });
 
 function updateCorsBypasser() {
@@ -115,23 +105,19 @@ function navigate(retryCount = 0) {
         }
     })
     .then(response => {
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
         return response.text();
     })
     .then(data => {
-        iframe.srcdoc = data;
+        iframe.srcdoc = data.replace(/<a /g, '<a target="_top" ');
         urlBar.value = targetUrl;
     })
     .catch(error => {
-        console.error('Error:', error);
-        
         if (retryCount < bypassers.length - 1) {
             currentBypasserIndex = (currentBypasserIndex + 1) % bypassers.length;
             document.getElementById('cors-bypasser').selectedIndex = currentBypasserIndex;
-            alert(`Switching to Proxy ${currentBypasserIndex + 1}`);
             navigate(retryCount + 1);
         } else {
-            alert('All proxies failed. Try again later.');
             iframe.srcdoc = `<h1>Error loading page</h1><p>${error.message}</p>`;
         }
     });
@@ -149,9 +135,7 @@ function refreshPage() {
     iframe.contentWindow?.location?.reload();
 }
 
-urlBar.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') navigate();
-});
+urlBar.addEventListener('keypress', e => e.key === 'Enter' && navigate());
 
 urlBar.value = 'start_page.html';
 navigate();
