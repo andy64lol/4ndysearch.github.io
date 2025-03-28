@@ -7,10 +7,12 @@ const bypassers = [
     'https://another-cors-proxy.com/'
 ];
 
-function switchCorsBypasser() {
-    currentBypasserIndex = (currentBypasserIndex + 1) % bypassers.length;
-    alert(`Switched to: ${bypassers[currentBypasserIndex]}`);
+function updateCorsBypasser() {
+    const selectElement = document.getElementById('cors-bypasser');
+    const selectedBypasser = selectElement.value;
+    currentBypasserIndex = bypassers.indexOf(selectedBypasser);
 }
+
 
 function navigate() {
     let url = urlBar.value;
