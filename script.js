@@ -13,7 +13,19 @@ function navigate() {
     }
     
     const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
-    iframe.src = proxyUrl;
+    const headers = {
+        'Origin': window.location.origin,
+        'X-Requested-With': 'XMLHttpRequest'
+    };
+    
+    fetch(proxyUrl, { headers })
+        .then(response => response.text())
+        .then(data => {
+            iframe.srcdoc = data;
+        })
+        .catch(error => {
+            console.error('Error fetching the URL:', error);
+        });
 }
 
 function goBack() {
