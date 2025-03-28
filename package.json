@@ -1,0 +1,13 @@
+{
+  "name": "4ndySearch",
+  "version": "1.0.0",
+  "description": "A search engine using HTML, CSS, and JavaScript with Node.js backend to bypass CORS.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "axios": "^0.21.1"
+  }
+}
