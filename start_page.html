@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4ndySearch Start Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #0f0f0f;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        #clock {
+            font-size: 5rem;
+            font-weight: 300;
+            margin: 1rem 0;
+            color: #e0e0e0;
+        }
+
+        #greeting {
+            font-size: 2.5rem;
+            color: #888;
+            margin-bottom: 2rem;
+        }
+
+        .instruction {
+            font-size: 1.2rem;
+            color: #555;
+            position: fixed;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="instruction">
+        Type any URL in the address bar above to navigate
+    </div>
+
+    <div class="container">
+        <div id="greeting"></div>
+        <div id="clock"></div>
+    </div>
+
+    <script>
+        function updateGreeting() {
+            const greeting = document.getElementById('greeting');
+            const hour = new Date().getHours();
+            
+            if (hour < 12) {
+                greeting.textContent = 'Good Morning';
+            } else if (hour < 18) {
+                greeting.textContent = 'Good Afternoon';
+            } else {
+                greeting.textContent = 'Good Evening';
+            }
+        }
+
+        function updateClock() {
+            const clock = document.getElementById('clock');
+            const now = new Date();
+            
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            clock.textContent = timeString;
+        }
+
+        updateGreeting();
+        updateClock();
+        setInterval(() => {
+            updateGreeting();
+            updateClock();
+        }, 1000);
+    </script>
+</body>
+</html>
