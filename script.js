@@ -1,24 +1,34 @@
 const iframe = document.getElementById('browser-frame');
 const urlBar = document.getElementById('url-bar');
 
+let currentBypasserIndex = 0; // Initialize the index for the CORS bypassers
+const bypassers = [
+    'https://cors-anywhere.herokuapp.com/',
+    'https://another-cors-proxy.com/'
+];
+
+function switchCorsBypasser() {
+    currentBypasserIndex = (currentBypasserIndex + 1) % bypassers.length;
+    alert(`Switched to: ${bypassers[currentBypasserIndex]}`);
+}
+
 function navigate() {
     let url = urlBar.value;
     if (!url) {
         alert('Please enter a URL');
         return;
     }
-
+    
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = `https://${url}`;
     }
     
-    const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
-    const headers = {
+    const proxyUrl = `${bypassers[currentBypasserIndex]}${url}`;
+    
+    fetch(proxyUrl, { method: 'GET', headers: {
         'Origin': window.location.origin,
         'X-Requested-With': 'XMLHttpRequest'
-    };
-    
-    fetch(proxyUrl, { method: 'GET', headers: headers })
+    }})
         .then(response => response.text())
         .then(data => {
             iframe.srcdoc = data;
