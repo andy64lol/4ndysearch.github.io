@@ -56,5 +56,5 @@ urlBar.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') navigate();
 });
 
-urlBar.value = 'https://andy64lol.github.io/4ndysearch.github.io/start_page.html';
+urlBar.value = 'start_page.html';
 navigate();
