@@ -13,12 +13,12 @@ function navigate() {
     }
     
     const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
-    const headers = {
+    const headers = new Headers({
         'Origin': window.location.origin,
         'X-Requested-With': 'XMLHttpRequest'
-    };
+    });
     
-    fetch(proxyUrl, { headers })
+    fetch(proxyUrl, { method: 'GET', headers })
         .then(response => response.text())
         .then(data => {
             iframe.srcdoc = data;
