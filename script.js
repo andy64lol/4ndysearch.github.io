@@ -12,7 +12,7 @@ function navigate() {
         url = `https://${url}`;
     }
     
-    const proxyUrl = `http://localhost:3000/proxy?url=${encodeURIComponent(url)}`;
+    const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
     iframe.src = proxyUrl;
 }
 
